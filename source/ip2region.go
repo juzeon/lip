@@ -13,6 +13,10 @@ type IP2Region struct {
 	searcher *xdb.Searcher
 }
 
+func (i *IP2Region) IsOnline() bool {
+	return false
+}
+
 func (i *IP2Region) GetDatabaseFileName() string {
 	return "ip2region.xdb"
 }
@@ -42,7 +46,7 @@ func (i *IP2Region) DownloadDatabase() error {
 	}, util.MustLipPath(i.GetDatabaseFileName()))
 }
 
-func (i *IP2Region) LookUp(ip net.IP, duplicateIdentical bool) (data.IPLookupResult, error) {
+func (i *IP2Region) LookUp(ip net.IP) (data.IPLookupResult, error) {
 	str, err := i.searcher.SearchByStr(ip.String())
 	if err != nil {
 		return data.IPLookupResult{}, err
@@ -51,7 +55,7 @@ func (i *IP2Region) LookUp(ip net.IP, duplicateIdentical bool) (data.IPLookupRes
 	return data.IPLookupResult{
 		Source:  i.GetName(),
 		Country: util.Ternary(arr[0] == "0", "", arr[0]),
-		State:   util.Ternary(arr[2] == "0", "", arr[2]),
+		Region:  util.Ternary(arr[2] == "0", "", arr[2]),
 		City:    util.Ternary(arr[3] == "0", "", arr[3]),
 		ISP:     util.Ternary(arr[4] == "0", "", arr[4]),
 	}, nil

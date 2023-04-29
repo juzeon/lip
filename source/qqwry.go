@@ -12,6 +12,10 @@ type QQWry struct {
 	db *qqwry.DB
 }
 
+func (q *QQWry) IsOnline() bool {
+	return false
+}
+
 func (q *QQWry) Init() error {
 	db, err := qqwry.Open(util.MustLipPath(q.GetDatabaseFileName()))
 	if err != nil {
@@ -40,7 +44,7 @@ func (q *QQWry) DownloadDatabase() error {
 	}, util.MustLipPath(q.GetDatabaseFileName()))
 }
 
-func (q *QQWry) LookUp(ip net.IP, duplicateIdentical bool) (data.IPLookupResult, error) {
+func (q *QQWry) LookUp(ip net.IP) (data.IPLookupResult, error) {
 	record, err := q.db.Query(ip)
 	if err != nil {
 		return data.IPLookupResult{}, err
@@ -49,9 +53,9 @@ func (q *QQWry) LookUp(ip net.IP, duplicateIdentical bool) (data.IPLookupResult,
 	return data.IPLookupResult{
 		Source:  q.GetName(),
 		Country: result,
-		State:   util.Ternary(duplicateIdentical, result, ""),
-		City:    util.Ternary(duplicateIdentical, result, ""),
-		ISP:     util.Ternary(duplicateIdentical, result, ""),
+		Region:  "",
+		City:    "",
+		ISP:     "",
 	}, nil
 }
 

@@ -29,17 +29,33 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalln("cannot parse ip address from the argument: " + err.Error())
 		}
+		if flags.Both {
+			fmt.Println("Fetching results from both offline and online sources...")
+		}
 		for _, ip := range ips {
-			resArr := doLookup(ip)
-			fmt.Println("Lookup result of " + ip.String() + ": ")
+			resArr := doLookup(ip, false)
+			if flags.Both {
+				resArr = append(resArr, doLookup(ip, true)...)
+			}
+			fmt.Println(util.Ternary(flags.Both, "Lookup", "Offline lookup") +
+				" result of " + ip.String() + ": ")
 			renderIPLookupResultTable(resArr)
+		}
+		if !flags.Both {
+			fmt.Println("Fetching results from online sources...")
+			for _, ip := range ips {
+				resArr := doLookup(ip, true)
+				fmt.Println("Online lookup result of " + ip.String() + ": ")
+				renderIPLookupResultTable(resArr)
+			}
 		}
 	},
 }
 
 type flagStruct struct {
-	Proxy        string
-	ReverseTable bool
+	Proxy   string
+	Reverse bool
+	Both    bool
 }
 
 var flags = flagStruct{}
@@ -47,17 +63,19 @@ var flags = flagStruct{}
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&flags.Proxy, "proxy", "p", "",
 		"set up a proxy, for example: http://127.0.0.1:7890")
-	rootCmd.Flags().BoolVarP(&flags.ReverseTable, "reverse-table", "r", false,
+	rootCmd.Flags().BoolVarP(&flags.Reverse, "reverse", "r", false,
 		"reverse the output table")
+	rootCmd.Flags().BoolVarP(&flags.Both, "both", "b", false,
+		"look up an IP or domain from both offline and online sources at once")
 }
 func renderIPLookupResultTable(resArr []data.IPLookupResult) {
 	table := tablewriter.NewWriter(os.Stdout)
 	var matrix [][]string
 	matrix = append(matrix, data.IPLookupResultTableHeader)
 	for _, res := range resArr {
-		matrix = append(matrix, []string{res.Source, res.Country, res.State, res.City, res.ISP})
+		matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP})
 	}
-	if flags.ReverseTable {
+	if flags.Reverse {
 		matrix = util.TransposeMatrix(matrix)
 	}
 	table.AppendBulk(matrix)
@@ -73,10 +91,14 @@ func Execute() {
 		log.Fatalln(err)
 	}
 }
-func doLookup(ip net.IP) []data.IPLookupResult {
+func doLookup(ip net.IP, onlineSource bool) []data.IPLookupResult {
 	var resArr []data.IPLookupResult
 	for _, ori := range source.Sources {
-		res, err := ori.LookUp(ip, flags.ReverseTable)
+		if onlineSource && !ori.IsOnline() ||
+			!onlineSource && ori.IsOnline() {
+			continue
+		}
+		res, err := ori.LookUp(ip)
 		if err != nil {
 			log.Println("failed to look up IP " + ip.String() + " from source " + ori.GetName())
 			continue

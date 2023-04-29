@@ -13,13 +13,15 @@ type ISource interface {
 	GetName() string
 	GetDatabaseFileName() string
 	DownloadDatabase() error
-	LookUp(ip net.IP, duplicateIdentical bool) (data.IPLookupResult, error)
+	LookUp(ip net.IP) (data.IPLookupResult, error)
 	CheckUpdate() bool
+	IsOnline() bool
 }
 
 var uninitializedSources = []ISource{
 	&IP2Region{},
 	&QQWry{},
+	&IPApi{},
 }
 var Sources []ISource
 
@@ -36,6 +38,9 @@ func InitDatabases() {
 }
 func DownloadDatabases(overwrite bool) {
 	for _, ori := range uninitializedSources {
+		if ori.IsOnline() {
+			continue
+		}
 		dbPath := util.MustLipPath(ori.GetDatabaseFileName())
 		if !util.MustCheckExist(dbPath) || overwrite {
 			log.Println("downloading database of " + ori.GetName())

@@ -10,20 +10,20 @@ import (
 	"time"
 )
 
-var client *resty.Client
+var Client *resty.Client
 
 func init() {
-	client = resty.New().
+	Client = resty.New().
 		SetTimeout(120 * time.Second).
 		SetHeaders(map[string]string{
 			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0",
 		})
 }
 func SetProxy(url string) {
-	client = client.SetProxy(url)
+	Client = Client.SetProxy(url)
 }
 func DownloadTo(url string, filePath string) error {
-	resp, err := client.R().Get(url)
+	resp, err := Client.R().Get(url)
 	if err != nil {
 		return err
 	}
