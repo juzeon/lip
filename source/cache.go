@@ -51,3 +51,9 @@ func UpsertCache(res data.IPLookupResult) {
 		log.Fatalln("cannot write into cache file: " + err.Error())
 	}
 }
+func ClearCache() {
+	err := os.Remove(util.MustLipPath("cache.json"))
+	if err != nil {
+		log.Fatalln("cannot delete cache file: " + err.Error())
+	}
+}

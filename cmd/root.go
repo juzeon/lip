@@ -64,6 +64,8 @@ type flagStruct struct {
 var flags = flagStruct{}
 
 func init() {
+	rootCmd.AddCommand(clearcacheCmd)
+
 	rootCmd.PersistentFlags().StringVarP(&flags.Proxy, "proxy", "p", "",
 		"set up a proxy, for example: http://127.0.0.1:7890")
 	rootCmd.Flags().BoolVarP(&flags.Reverse, "reverse", "r", false,
