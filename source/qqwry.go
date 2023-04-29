@@ -51,6 +51,7 @@ func (q *QQWry) LookUp(ip net.IP) (data.IPLookupResult, error) {
 	}
 	result := record.Country + " " + record.City
 	return data.IPLookupResult{
+		IP:      ip,
 		Source:  q.GetName(),
 		Country: result,
 		Region:  "",

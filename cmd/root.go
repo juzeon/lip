@@ -23,6 +23,7 @@ var rootCmd = &cobra.Command{
 			httpclient.SetProxy(flags.Proxy)
 		}
 		util.InitFs()
+		source.InitCache()
 		source.DownloadDatabases(false)
 		source.InitDatabases()
 		ips, err := parseIP(args[0])
@@ -56,6 +57,7 @@ type flagStruct struct {
 	Proxy   string
 	Reverse bool
 	Both    bool
+	NoCache bool
 }
 
 var flags = flagStruct{}
@@ -67,6 +69,8 @@ func init() {
 		"reverse the output table")
 	rootCmd.Flags().BoolVarP(&flags.Both, "both", "b", false,
 		"look up an IP or domain from both offline and online sources at once")
+	rootCmd.Flags().BoolVarP(&flags.NoCache, "nocache", "n", false,
+		"disable cache for the IP to look up (only resolved IP and online sources will be cached)")
 }
 func renderIPLookupResultTable(resArr []data.IPLookupResult) {
 	table := tablewriter.NewWriter(os.Stdout)
@@ -98,12 +102,21 @@ func doLookup(ip net.IP, onlineSource bool) []data.IPLookupResult {
 			!onlineSource && ori.IsOnline() {
 			continue
 		}
+		if !flags.NoCache && ori.IsOnline() {
+			if cacheRes, ok := source.FindCache(ip, ori.GetName()); ok {
+				resArr = append(resArr, cacheRes)
+				continue
+			}
+		}
 		res, err := ori.LookUp(ip)
 		if err != nil {
 			log.Println("failed to look up IP " + ip.String() + " from source " + ori.GetName())
 			continue
 		}
 		resArr = append(resArr, res)
+		if ori.IsOnline() {
+			source.UpsertCache(res)
+		}
 	}
 	return resArr
 }

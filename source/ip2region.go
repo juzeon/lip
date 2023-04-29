@@ -53,6 +53,7 @@ func (i *IP2Region) LookUp(ip net.IP) (data.IPLookupResult, error) {
 	}
 	arr := strings.Split(str, "|")
 	return data.IPLookupResult{
+		IP:      ip,
 		Source:  i.GetName(),
 		Country: util.Ternary(arr[0] == "0", "", arr[0]),
 		Region:  util.Ternary(arr[2] == "0", "", arr[2]),

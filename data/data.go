@@ -1,11 +1,14 @@
 package data
 
+import "net"
+
 type IPLookupResult struct {
-	Source  string
-	Country string
-	Region  string
-	City    string
-	ISP     string
+	IP      net.IP `json:"IP"`
+	Source  string `json:"source"`
+	Country string `json:"country"`
+	Region  string `json:"region"`
+	City    string `json:"city"`
+	ISP     string `json:"ISP"`
 }
 
 var IPLookupResultTableHeader = []string{"Source", "Country", "Region", "City", "ISP"}

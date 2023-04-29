@@ -54,6 +54,7 @@ func (i *IPApi) LookUp(ip net.IP) (data.IPLookupResult, error) {
 		return data.IPLookupResult{}, errors.New(result.Message)
 	}
 	return data.IPLookupResult{
+		IP:      ip,
 		Source:  i.GetName(),
 		Country: result.Country,
 		Region:  result.RegionName,
