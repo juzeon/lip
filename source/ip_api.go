@@ -6,6 +6,7 @@ import (
 	"github.com/juzeon/lip/httpclient"
 	"github.com/juzeon/lip/util"
 	"net"
+	"strconv"
 )
 
 type IPApi struct {
@@ -48,6 +49,9 @@ func (i *IPApi) LookUp(ip net.IP) (data.IPLookupResult, error) {
 		"?fields=status,message,country,regionName,city,district,isp,org,as,query")
 	if err != nil {
 		return data.IPLookupResult{}, err
+	}
+	if resp.StatusCode() != 200 {
+		return data.IPLookupResult{}, errors.New("respond with status code: " + strconv.Itoa(resp.StatusCode()))
 	}
 	result := resp.Result().(*Result)
 	if result.Status != "success" {

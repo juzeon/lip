@@ -22,33 +22,39 @@ var uninitializedSources = []ISource{
 	&IP2Region{},
 	&QQWry{},
 	&IPApi{},
+	&IPInfo{},
 }
 var Sources []ISource
 
 func InitDatabases() {
-	for _, ori := range uninitializedSources {
-		ori := ori
-		err := ori.Init()
+	for _, src := range uninitializedSources {
+		src := src
+		err := src.Init()
 		if err != nil {
-			log.Println("failed to initialize " + ori.GetName())
+			log.Println("failed to initialize " + src.GetName())
 			continue
 		}
-		Sources = append(Sources, ori)
+		Sources = append(Sources, src)
+	}
+}
+func CloseDatabases() {
+	for _, src := range Sources {
+		src.Close()
 	}
 }
 func DownloadDatabases(overwrite bool) {
-	for _, ori := range uninitializedSources {
-		if ori.IsOnline() {
+	for _, src := range uninitializedSources {
+		if src.IsOnline() {
 			continue
 		}
-		dbPath := util.MustLipPath(ori.GetDatabaseFileName())
+		dbPath := util.MustLipPath(src.GetDatabaseFileName())
 		if !util.MustCheckExist(dbPath) || overwrite {
-			log.Println("downloading database of " + ori.GetName())
-			err := ori.DownloadDatabase()
+			log.Println("downloading database of " + src.GetName())
+			err := src.DownloadDatabase()
 			if err != nil {
-				log.Println("failed to download " + ori.GetName() + " into " + dbPath)
+				log.Println("failed to download " + src.GetName() + " into " + dbPath)
 			}
-			log.Println("downloaded " + ori.GetName() + " successfully")
+			log.Println("downloaded " + src.GetName() + " successfully")
 		}
 	}
 }

@@ -26,6 +26,7 @@ var rootCmd = &cobra.Command{
 		source.InitCache()
 		source.DownloadDatabases(false)
 		source.InitDatabases()
+		defer source.CloseDatabases()
 		ips, err := parseIP(args[0])
 		if err != nil {
 			log.Fatalln("cannot parse ip address from the argument: " + err.Error())
@@ -77,7 +78,7 @@ func renderIPLookupResultTable(resArr []data.IPLookupResult) {
 	var matrix [][]string
 	matrix = append(matrix, data.IPLookupResultTableHeader)
 	for _, res := range resArr {
-		matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP})
+		matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP, res.Additional})
 	}
 	if flags.Reverse {
 		matrix = util.TransposeMatrix(matrix)
@@ -97,24 +98,24 @@ func Execute() {
 }
 func doLookup(ip net.IP, onlineSource bool) []data.IPLookupResult {
 	var resArr []data.IPLookupResult
-	for _, ori := range source.Sources {
-		if onlineSource && !ori.IsOnline() ||
-			!onlineSource && ori.IsOnline() {
+	for _, src := range source.Sources {
+		if onlineSource && !src.IsOnline() ||
+			!onlineSource && src.IsOnline() {
 			continue
 		}
-		if !flags.NoCache && ori.IsOnline() {
-			if cacheRes, ok := source.FindCache(ip, ori.GetName()); ok {
+		if !flags.NoCache && src.IsOnline() {
+			if cacheRes, ok := source.FindCache(ip, src.GetName()); ok {
 				resArr = append(resArr, cacheRes)
 				continue
 			}
 		}
-		res, err := ori.LookUp(ip)
+		res, err := src.LookUp(ip)
 		if err != nil {
-			log.Println("failed to look up IP " + ip.String() + " from source " + ori.GetName())
+			log.Println("failed to look up IP " + ip.String() + " from source " + src.GetName())
 			continue
 		}
 		resArr = append(resArr, res)
-		if ori.IsOnline() {
+		if src.IsOnline() {
 			source.UpsertCache(res)
 		}
 	}
