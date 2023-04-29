@@ -26,3 +26,12 @@ func MustCheckExist(filePath string) bool {
 	}
 	return true
 }
+func InitFs() {
+	lipPath := MustLipPath()
+	if !MustCheckExist(lipPath) {
+		err := os.MkdirAll(lipPath, 0755)
+		if err != nil {
+			log.Fatalln("cannot mkdir in user home directory: " + err.Error())
+		}
+	}
+}
