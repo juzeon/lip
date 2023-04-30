@@ -6,7 +6,15 @@
 
 ## Install
 
-You can install `lip` with the go command below:
+Install `lip` by cloning this repository and compiling it:
+
+```bash
+git clone https://github.com/juzeon/lip
+cd lip/
+go install
+```
+
+Or, install `lip` with the go command below:
 
 ```bash
 go install github.com/juzeon/lip@latest
