@@ -139,7 +139,8 @@ func doTcpingOnce(address string) tcpingResult {
 	t := time.Now()
 	conn, err := net.DialTimeout("tcp", address, time.Duration(tcpingFlags.Timeout)*time.Second)
 	if err != nil {
-		if strings.Contains(err.Error(), "actively refused") {
+		if strings.Contains(err.Error(), "actively refused") ||
+			strings.Contains(err.Error(), "connection refused") {
 			return tcpingResult{Num: tcpingRST, Dur: time.Since(t), Addr: address}
 		} else if strings.Contains(err.Error(), "timeout") {
 			return tcpingResult{Num: tcpingNoResponse, Dur: time.Since(t), Addr: address}
