@@ -138,6 +138,7 @@ func (t tcpingResult) WriteOut(writer io.Writer) {
 }
 
 func doTcpingOnce(address string) tcpingResult {
+	defer time.Sleep(time.Duration(tcpingFlags.Wait * float64(time.Second)))
 	t := time.Now()
 	conn, err := net.DialTimeout("tcp", address, time.Duration(tcpingFlags.Timeout)*time.Second)
 	if err != nil {
@@ -152,7 +153,6 @@ func doTcpingOnce(address string) tcpingResult {
 			return tcpingResult{Num: tcpingUnknown, Dur: time.Since(t), Addr: address}
 		}
 	}
-	defer time.Sleep(time.Duration(tcpingFlags.Wait * float64(time.Second)))
 	defer conn.Close()
 	return tcpingResult{Num: tcpingOpen, Dur: time.Since(t), Addr: address}
 }
