@@ -7,6 +7,7 @@ import (
 	"github.com/juzeon/lip/util"
 	"net"
 	"strconv"
+	"time"
 )
 
 type IPApi struct {
@@ -45,7 +46,7 @@ func (i *IPApi) LookUp(ip net.IP) (data.IPLookupResult, error) {
 		Org        string `json:"org"`
 		As         string `json:"as"`
 	}
-	resp, err := httpclient.Client.R().SetResult(&Result{}).Get("http://ip-api.com/json/" + ip.String() +
+	resp, err := httpclient.GetClient().SetTimeout(10 * time.Second).R().SetResult(&Result{}).Get("http://ip-api.com/json/" + ip.String() +
 		"?fields=status,message,country,regionName,city,district,isp,org,as,query")
 	if err != nil {
 		return data.IPLookupResult{}, err

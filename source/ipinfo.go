@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type IPInfo struct {
@@ -33,7 +34,7 @@ func (i *IPInfo) DownloadDatabase() error {
 }
 
 func (i *IPInfo) LookUp(ip net.IP) (data.IPLookupResult, error) {
-	resp, err := httpclient.Client.R().
+	resp, err := httpclient.GetClient().SetTimeout(10*time.Second).R().
 		SetResult(&ipinfoResult{}).
 		SetHeader("Referer", "https://ipinfo.io/").
 		Get("https://ipinfo.io/widget/demo/" + ip.String())

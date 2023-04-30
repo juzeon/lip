@@ -41,8 +41,10 @@ func (i *IP2Region) GetName() string {
 func (i *IP2Region) DownloadDatabase() error {
 	return httpclient.DownloadToWithMultipleURLs([]string{
 		"https://github.com/lionsoul2014/ip2region/raw/master/data/ip2region.xdb",
+		"https://hub.fgit.gq/lionsoul2014/ip2region/raw/master/data/ip2region.xdb",
+		"https://hub.fgit.ml/lionsoul2014/ip2region/raw/master/data/ip2region.xdb",
 		"https://ghproxy.com/github.com/lionsoul2014/ip2region/raw/master/data/ip2region.xdb",
-		"https://raw.fastgit.org/lionsoul2014/ip2region/master/data/ip2region.xdb",
+		"https://gitcode.net/mirrors/lionsoul2014/ip2region/-/raw/master/data/ip2region.xdb",
 	}, util.MustLipPath(i.GetDatabaseFileName()))
 }
 

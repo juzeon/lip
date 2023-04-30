@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
@@ -10,20 +11,29 @@ import (
 	"time"
 )
 
-var Client *resty.Client
+var proxy string
 
-func init() {
-	Client = resty.New().
-		SetTimeout(120 * time.Second).
+func GetClient() *resty.Client {
+	client := resty.New().
+		SetTimeout(60 * time.Second).
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
 		SetHeaders(map[string]string{
 			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0",
 		})
+	if proxy != "" {
+		client.SetProxy(proxy)
+	}
+	return client
 }
 func SetProxy(url string) {
-	Client = Client.SetProxy(url)
+	proxy = url
 }
 func DownloadTo(url string, filePath string) error {
-	resp, err := Client.R().Get(url)
+	_, err := GetClient().SetTimeout(5 * time.Second).R().Head(url)
+	if err != nil {
+		return err
+	}
+	resp, err := GetClient().R().Get(url)
 	if err != nil {
 		return err
 	}

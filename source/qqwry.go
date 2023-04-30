@@ -39,8 +39,9 @@ func (q *QQWry) GetDatabaseFileName() string {
 func (q *QQWry) DownloadDatabase() error {
 	return httpclient.DownloadToWithMultipleURLs([]string{
 		"https://github.com/FW27623/qqwry/raw/main/qqwry.dat",
+		"https://hub.fgit.gq/FW27623/qqwry/raw/main/qqwry.dat",
+		"https://hub.fgit.ml/FW27623/qqwry/raw/main/qqwry.dat",
 		"https://ghproxy.com/github.com/FW27623/qqwry/raw/main/qqwry.dat",
-		"https://raw.fastgit.org/FW27623/qqwry/main/qqwry.dat",
 	}, util.MustLipPath(q.GetDatabaseFileName()))
 }
 

@@ -53,8 +53,9 @@ func DownloadDatabases(overwrite bool) {
 			err := src.DownloadDatabase()
 			if err != nil {
 				log.Println("failed to download " + src.GetName() + " into " + dbPath)
+			} else {
+				log.Println("downloaded " + src.GetName() + " successfully")
 			}
-			log.Println("downloaded " + src.GetName() + " successfully")
 		}
 	}
 }
