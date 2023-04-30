@@ -17,8 +17,12 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "lip [IP or domain]",
 	Short: "A tool to look up IP addresses",
-	Long:  `lip is a tool for looking up IP addresses with many additional functions`,
-	Args:  cobra.MatchAll(cobra.ExactArgs(1)),
+	Long: `lip is a versatile command-line interface (CLI) tool that enables users to 
+search for IP addresses and perform a wide range of additional 
+functions. With lip, users can easily look up IP addresses, 
+both for IPv4 and IPv6, and obtain detailed information about 
+the associated domain names, subnets, and geolocations.`,
+	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
 		if flags.Proxy != "" {
 			httpclient.SetProxy(flags.Proxy)
@@ -128,7 +132,7 @@ func doLookup(ip net.IP, onlineSource bool) []data.IPLookupResult {
 		}
 		res, err := src.LookUp(ip)
 		if err != nil {
-			log.Println("failed to look up IP " + ip.String() + " from source " + src.GetName())
+			log.Println("failed to look up IP " + ip.String() + " from source " + src.GetName() + ": " + err.Error())
 			continue
 		}
 		resArr = append(resArr, res)
