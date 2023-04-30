@@ -15,7 +15,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "lip [IP or domain]",
+	Use:   "lip <IP or domain>",
 	Short: "A tool to look up IP addresses.",
 	Long: `lip is a versatile command-line interface (CLI) tool that enables users to 
 look up IP addresses and perform a wide range of additional 

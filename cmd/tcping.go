@@ -15,7 +15,7 @@ import (
 )
 
 var tcpingCmd = &cobra.Command{
-	Use:   "tcping",
+	Use:   "tcping <1.1.1.1:443 or 1.1.1.1 443>",
 	Short: "TCPing an address with a port",
 	Args:  cobra.MatchAll(cobra.MinimumNArgs(1), cobra.MaximumNArgs(2)),
 	Run: func(cmd *cobra.Command, args []string) {
