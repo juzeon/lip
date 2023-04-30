@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/juzeon/lip/data"
 	"github.com/juzeon/lip/httpclient"
@@ -36,19 +37,19 @@ var rootCmd = &cobra.Command{
 		}
 		for _, ip := range ips {
 			resArr := doLookup(ip, false)
-			if flags.Both {
+			if flags.Both && !flags.Offline {
 				resArr = append(resArr, doLookup(ip, true)...)
 			}
 			fmt.Println(util.Ternary(flags.Both, "Lookup", "Offline lookup") +
 				" result of " + ip.String() + ": ")
-			renderIPLookupResultTable(resArr)
+			renderIPLookupResult(resArr)
 		}
-		if !flags.Both {
+		if !flags.Both && !flags.Offline {
 			fmt.Println("Fetching results from online sources...")
 			for _, ip := range ips {
 				resArr := doLookup(ip, true)
 				fmt.Println("Online lookup result of " + ip.String() + ": ")
-				renderIPLookupResultTable(resArr)
+				renderIPLookupResult(resArr)
 			}
 		}
 	},
@@ -59,6 +60,8 @@ type flagStruct struct {
 	Reverse bool
 	Both    bool
 	NoCache bool
+	Offline bool
+	JSON    bool
 }
 
 var flags = flagStruct{}
@@ -73,24 +76,36 @@ func init() {
 	rootCmd.Flags().BoolVarP(&flags.Both, "both", "b", false,
 		"look up an IP or domain from both offline and online sources at once")
 	rootCmd.Flags().BoolVarP(&flags.NoCache, "nocache", "n", false,
-		"disable cache for the IP to look up (only resolved IP and online sources will be cached)")
+		"disable cache for the IP to look up (only resolved IPs and online sources will be cached)")
+	rootCmd.Flags().BoolVarP(&flags.Offline, "offline", "O", false,
+		"look up an IP from offline sources only")
+	rootCmd.Flags().BoolVarP(&flags.JSON, "json", "j", false,
+		"use JSON output format instead of ASCII table")
 }
-func renderIPLookupResultTable(resArr []data.IPLookupResult) {
-	table := tablewriter.NewWriter(os.Stdout)
-	var matrix [][]string
-	matrix = append(matrix, data.IPLookupResultTableHeader)
-	for _, res := range resArr {
-		matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP, res.Additional})
+func renderIPLookupResult(resArr []data.IPLookupResult) {
+	if flags.JSON {
+		v, err := json.MarshalIndent(resArr, "", "  ")
+		if err != nil {
+			log.Fatalln("cannot marshal result json: " + err.Error())
+		}
+		fmt.Println(string(v))
+	} else {
+		table := tablewriter.NewWriter(os.Stdout)
+		var matrix [][]string
+		matrix = append(matrix, data.IPLookupResultTableHeader)
+		for _, res := range resArr {
+			matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP, res.Additional})
+		}
+		if flags.Reverse {
+			matrix = util.TransposeMatrix(matrix)
+		}
+		table.AppendBulk(matrix)
+		table.SetAlignment(tablewriter.ALIGN_CENTER)
+		table.SetColumnAlignment([]int{tablewriter.ALIGN_CENTER})
+		table.SetAutoMergeCells(true)
+		table.SetRowLine(true)
+		table.Render()
 	}
-	if flags.Reverse {
-		matrix = util.TransposeMatrix(matrix)
-	}
-	table.AppendBulk(matrix)
-	table.SetAlignment(tablewriter.ALIGN_CENTER)
-	table.SetColumnAlignment([]int{tablewriter.ALIGN_CENTER})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
-	table.Render()
 }
 func Execute() {
 	err := rootCmd.Execute()

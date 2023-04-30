@@ -3,12 +3,12 @@ package data
 import "net"
 
 type IPLookupResult struct {
-	IP         net.IP `json:"IP"`
+	IP         net.IP `json:"ip"`
 	Source     string `json:"source"`
 	Country    string `json:"country"`
 	Region     string `json:"region"`
 	City       string `json:"city"`
-	ISP        string `json:"ISP"`
+	ISP        string `json:"isp"`
 	Additional string `json:"additional"`
 }
 
