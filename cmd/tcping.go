@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -142,9 +144,11 @@ func doTcpingOnce(address string) tcpingResult {
 		if strings.Contains(err.Error(), "actively refused") ||
 			strings.Contains(err.Error(), "connection refused") {
 			return tcpingResult{Num: tcpingRST, Dur: time.Since(t), Addr: address}
-		} else if strings.Contains(err.Error(), "timeout") {
+		} else if errors.Is(err, context.DeadlineExceeded) ||
+			errors.Is(err, syscall.ETIMEDOUT) {
 			return tcpingResult{Num: tcpingNoResponse, Dur: time.Since(t), Addr: address}
 		} else {
+			log.Println(err)
 			return tcpingResult{Num: tcpingUnknown, Dur: time.Since(t), Addr: address}
 		}
 	}
