@@ -15,3 +15,7 @@ var clearcacheCmd = &cobra.Command{
 		fmt.Println("cleared cache file successfully")
 	},
 }
+
+func init() {
+	rootCmd.AddCommand(clearcacheCmd)
+}

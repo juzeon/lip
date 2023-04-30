@@ -24,8 +24,8 @@ both for IPv4 and IPv6, and obtain detailed information about
 the associated domain names, subnets, and geolocations.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
-		if flags.Proxy != "" {
-			httpclient.SetProxy(flags.Proxy)
+		if rootFlags.Proxy != "" {
+			httpclient.SetProxy(rootFlags.Proxy)
 		}
 		util.InitFs()
 		source.InitCache()
@@ -36,19 +36,19 @@ the associated domain names, subnets, and geolocations.`,
 		if err != nil {
 			log.Fatalln("cannot parse ip address from the argument: " + err.Error())
 		}
-		if flags.Both {
+		if rootFlags.Both {
 			fmt.Println("Fetching results from both offline and online sources...")
 		}
 		for _, ip := range ips {
 			resArr := doLookup(ip, false)
-			if flags.Both && !flags.Offline {
+			if rootFlags.Both && !rootFlags.Offline {
 				resArr = append(resArr, doLookup(ip, true)...)
 			}
-			fmt.Println(util.Ternary(flags.Both, "Lookup", "Offline lookup") +
+			fmt.Println(util.Ternary(rootFlags.Both, "Lookup", "Offline lookup") +
 				" result of " + ip.String() + ": ")
 			renderIPLookupResult(resArr)
 		}
-		if !flags.Both && !flags.Offline {
+		if !rootFlags.Both && !rootFlags.Offline {
 			fmt.Println("Fetching results from online sources...")
 			for _, ip := range ips {
 				resArr := doLookup(ip, true)
@@ -59,7 +59,7 @@ the associated domain names, subnets, and geolocations.`,
 	},
 }
 
-type flagStruct struct {
+type rootFlagStruct struct {
 	Proxy   string
 	Reverse bool
 	Both    bool
@@ -68,26 +68,24 @@ type flagStruct struct {
 	JSON    bool
 }
 
-var flags = flagStruct{}
+var rootFlags = rootFlagStruct{}
 
 func init() {
-	rootCmd.AddCommand(clearcacheCmd)
-
-	rootCmd.PersistentFlags().StringVarP(&flags.Proxy, "proxy", "p", "",
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.Proxy, "proxy", "p", "",
 		"set up a proxy, for example: http://127.0.0.1:7890")
-	rootCmd.Flags().BoolVarP(&flags.Reverse, "reverse", "r", false,
+	rootCmd.Flags().BoolVarP(&rootFlags.Reverse, "reverse", "r", false,
 		"reverse the output table")
-	rootCmd.Flags().BoolVarP(&flags.Both, "both", "b", false,
+	rootCmd.Flags().BoolVarP(&rootFlags.Both, "both", "b", false,
 		"look up an IP or domain from both offline and online sources at once")
-	rootCmd.Flags().BoolVarP(&flags.NoCache, "nocache", "n", false,
+	rootCmd.Flags().BoolVarP(&rootFlags.NoCache, "nocache", "n", false,
 		"disable cache for the IP to look up (only resolved IPs and online sources will be cached)")
-	rootCmd.Flags().BoolVarP(&flags.Offline, "offline", "O", false,
+	rootCmd.Flags().BoolVarP(&rootFlags.Offline, "offline", "O", false,
 		"look up an IP from offline sources only")
-	rootCmd.Flags().BoolVarP(&flags.JSON, "json", "j", false,
+	rootCmd.Flags().BoolVarP(&rootFlags.JSON, "json", "j", false,
 		"use JSON output format instead of ASCII table")
 }
 func renderIPLookupResult(resArr []data.IPLookupResult) {
-	if flags.JSON {
+	if rootFlags.JSON {
 		v, err := json.MarshalIndent(resArr, "", "  ")
 		if err != nil {
 			log.Fatalln("cannot marshal result json: " + err.Error())
@@ -100,7 +98,7 @@ func renderIPLookupResult(resArr []data.IPLookupResult) {
 		for _, res := range resArr {
 			matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP, res.Additional})
 		}
-		if flags.Reverse {
+		if rootFlags.Reverse {
 			matrix = util.TransposeMatrix(matrix)
 		}
 		table.AppendBulk(matrix)
@@ -124,7 +122,7 @@ func doLookup(ip net.IP, onlineSource bool) []data.IPLookupResult {
 			!onlineSource && src.IsOnline() {
 			continue
 		}
-		if !flags.NoCache && src.IsOnline() {
+		if !rootFlags.NoCache && src.IsOnline() {
 			if cacheRes, ok := source.FindCache(ip, src.GetName()); ok {
 				resArr = append(resArr, cacheRes)
 				continue

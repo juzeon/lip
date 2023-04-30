@@ -2,7 +2,7 @@
 
 `lip` is a versatile command-line interface (CLI) tool that enables users to look up IP addresses and perform a wide range of additional functions. With `lip`, users can easily look up IP addresses, both for IPv4 and IPv6, and obtain detailed information about the associated domain names, subnets, and geolocations.
 
-*This tool is under development currently.*
+*This project is under development currently.*
 
 ## Install
 
@@ -19,3 +19,14 @@ Type `lip -h` for help.
 ## Screenshots
 
 ![](docs/screenshot_1.png)
+![](docs/screenshot_2.png)
+
+## Todos
+
+- [x] IP Lookup
+- [x] TCPing
+- [ ] Telnet
+- [ ] WHOIS lookup
+- [ ] Reverse DNS lookup
+- [ ] SSL Certificate Check
+- [ ] Bandwidth Test
