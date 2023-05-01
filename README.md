@@ -63,8 +63,15 @@ Probing 10.10.10.25:443/tcp - Port is open (open) - time=3.6459ms
 
 ### Packet Sender
 ```bash
-lip packet 127.0.0.1:9999 "hello"
-hello
+λ lip packet google.com:80 "GET /"
+HTTP/1.0 200 OK
+Content-Type: text/html; charset=ISO-8859-1
+Server: gws
+...
+Vary: Accept-Encoding
+
+<!doctype html>
+...
 ```
 
 ## Todos
