@@ -46,8 +46,8 @@ var packetCmd = &cobra.Command{
 		defer conn.Close()
 		go func() {
 			for {
-				b := make([]byte, 1)
-				_, err := conn.Read(b)
+				b := make([]byte, 1024*100)
+				n, err := conn.Read(b)
 				if err != nil && !errors.Is(err, io.EOF) {
 					log.Println("read conn error: " + err.Error())
 					os.Exit(1)
@@ -55,7 +55,7 @@ var packetCmd = &cobra.Command{
 				if err != nil {
 					os.Exit(0)
 				}
-				_, err = os.Stdout.Write(b)
+				_, err = os.Stdout.Write(b[:n])
 				if err != nil {
 					log.Println("write to stdout error: " + err.Error())
 				}
