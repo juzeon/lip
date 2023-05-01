@@ -19,7 +19,7 @@ import (
 
 var packetCmd = &cobra.Command{
 	Use:   "packet <host:port> [content]",
-	Short: "Send TCP/UDP packets. Default: TCP.",
+	Short: "Send TCP/UDP packets. Default: TCP",
 	Args:  cobra.MatchAll(cobra.MinimumNArgs(1), cobra.MaximumNArgs(2)),
 	Run: func(cmd *cobra.Command, args []string) {
 		if packetFlags.Interactive && len(args) == 2 ||
@@ -62,7 +62,7 @@ var packetCmd = &cobra.Command{
 			}
 		}()
 		if packetFlags.Interactive {
-			fmt.Println("Interactive mode. Use enter to send content and a predefined linebreak.")
+			fmt.Println("Interactive mode. Use enter to send content followed by a predefined linebreak.")
 			for {
 				reader := bufio.NewReader(os.Stdin)
 				text, _ := reader.ReadString('\n')
@@ -75,14 +75,19 @@ var packetCmd = &cobra.Command{
 	},
 }
 
-func packetWrite[T []byte | string](v T, writer io.Writer) {
+func packetWrite(v string, writer io.Writer) {
+	v = strings.ReplaceAll(v, "\\r", "\r")
+	v = strings.ReplaceAll(v, "\\n", "\n")
 	_, err := writer.Write([]byte(v))
 	if err != nil {
 		log.Println("" + err.Error())
 	}
-	_, err = io.WriteString(writer, packetFlags.GetRealLinebreak())
-	if err != nil {
-		log.Println("" + err.Error())
+	linebreak := packetFlags.GetRealLinebreak()
+	if linebreak != "" {
+		_, err = io.WriteString(writer, linebreak)
+		if err != nil {
+			log.Println("" + err.Error())
+		}
 	}
 }
 
@@ -110,5 +115,6 @@ func init() {
 	packetCmd.Flags().IntVarP(&packetFlags.Timeout, "timeout", "t", 5,
 		"n seconds timeout for network dial and data read")
 	packetCmd.Flags().StringVarP(&packetFlags.Linebreak, "linebreak", "b", "\r\n",
-		"used for linebreak automatically added to the content")
+		"used for linebreak automatically added to the end of content. "+
+			"Pass an empty string to disable auto linebreak")
 }
