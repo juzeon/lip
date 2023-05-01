@@ -41,7 +41,17 @@ var whoisCmd = &cobra.Command{
 
 func renderWhoisResult(info whoisparser.WhoisInfo) {
 	if whoisFlags.JSON {
-		v, err := json.MarshalIndent(info, "", "  ")
+		var target any
+		if whoisFlags.Domain {
+			if info.Domain == nil {
+				log.Println("no information for domain")
+				return
+			}
+			target = info.Domain
+		} else {
+			target = info
+		}
+		v, err := json.MarshalIndent(target, "", "  ")
 		if err != nil {
 			log.Fatalln("cannot marshal whois json: " + err.Error())
 		}
@@ -80,6 +90,9 @@ func renderWhoisResult(info whoisparser.WhoisInfo) {
 			info.Domain.ExpirationDate,
 		}))
 		util.WriteTable(data, os.Stdout, whoisFlags.Reverse)
+	}
+	if whoisFlags.Domain {
+		return
 	}
 	type ContactWithName struct {
 		Name    string
@@ -150,6 +163,7 @@ type whoisFlagStruct struct {
 	Timeout int
 	JSON    bool
 	Full    bool
+	Domain  bool
 }
 
 var whoisFlags = whoisFlagStruct{}
@@ -164,5 +178,7 @@ func init() {
 	whoisCmd.Flags().BoolVarP(&whoisFlags.JSON, "json", "j", false,
 		"use JSON output format instead of ASCII table")
 	whoisCmd.Flags().BoolVarP(&whoisFlags.Full, "full", "f", false,
-		"show full information of whois lookup")
+		"show full information columns of whois lookup")
+	whoisCmd.Flags().BoolVarP(&whoisFlags.Domain, "domain", "d", false,
+		"show information of the domain only, hiding contacts")
 }
