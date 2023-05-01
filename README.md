@@ -1,6 +1,6 @@
 # lip - Look up IP
 
-`lip` is a versatile command-line interface (CLI) tool that enables users to look up IP addresses and perform a wide range of additional functions. With `lip`, users can easily look up IP addresses, both for IPv4 and IPv6, and obtain detailed information about the associated domain names, subnets, and geolocations.
+`lip` is a versatile command-line tool designed for network administrators and enthusiasts, offering a suite of robust functions that enable users to perform a variety of network-related tasks efficiently and conveniently. With `lip`, you can execute IP address lookups, bandwidth tests, WHOIS lookups, reverse DNS lookups, SSL certificate checks, and TCPing and Telnet connections from the comfort of your terminal.
 
 *This project is under development currently.*
 
@@ -61,11 +61,17 @@ Probing 10.10.10.25:443/tcp - Port is open (open) - time=2.5113ms
 Probing 10.10.10.25:443/tcp - Port is open (open) - time=3.6459ms
 ```
 
+### Packet Sender
+```bash
+lip packet 127.0.0.1:9999 "hello"
+hello
+```
+
 ## Todos
 
 - [x] IP Lookup
 - [x] TCPing
-- [ ] Telnet
+- [x] Packet Sender
 - [ ] WHOIS lookup
 - [ ] Reverse DNS lookup
 - [ ] SSL Certificate Check

@@ -1,5 +1,12 @@
 package util
 
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+)
+
 func Ternary[T any](expression bool, trueResult T, falseResult T) T {
 	if expression {
 		return trueResult
@@ -23,4 +30,15 @@ func TransposeMatrix[T any](matrix [][]T) [][]T {
 		}
 	}
 	return transposed
+}
+func ExtractHostPort(addr string) (string, int, error) {
+	arr := strings.Split(addr, ":")
+	if len(arr) != 2 {
+		return "", 0, errors.New("malformed addr string")
+	}
+	port, err := strconv.Atoi(arr[1])
+	if err != nil {
+		return "", 0, fmt.Errorf("cannot parse port: " + err.Error())
+	}
+	return arr[0], port, nil
 }

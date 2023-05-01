@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/juzeon/lip/util"
 	"io"
 	"log"
 	"net"
@@ -24,7 +25,7 @@ var tcpingCmd = &cobra.Command{
 		var host string
 		var port int
 		if len(args) == 1 {
-			h, p, err := extractHostPort(args[0])
+			h, p, err := util.ExtractHostPort(args[0])
 			if err != nil {
 				log.Fatalln("malformed argument: " + err.Error())
 			}
@@ -94,18 +95,6 @@ func init() {
 		"automatically exit on a successful ping")
 	tcpingCmd.Flags().Float64VarP(&tcpingFlags.Wait, "wait", "w", 0.5,
 		"wait n(float64) seconds between pings")
-}
-
-func extractHostPort(addr string) (string, int, error) {
-	arr := strings.Split(addr, ":")
-	if len(arr) != 2 {
-		return "", 0, errors.New("malformed addr string")
-	}
-	port, err := strconv.Atoi(arr[1])
-	if err != nil {
-		return "", 0, fmt.Errorf("cannot parse port: " + err.Error())
-	}
-	return arr[0], port, nil
 }
 
 const (
