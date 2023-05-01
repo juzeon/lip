@@ -7,7 +7,6 @@ import (
 	"github.com/juzeon/lip/httpclient"
 	"github.com/juzeon/lip/source"
 	"github.com/juzeon/lip/util"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"log"
 	"net"
@@ -24,8 +23,8 @@ both for IPv4 and IPv6, and obtain detailed information about
 the associated domain names, subnets, and geolocations.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
-		if rootFlags.Proxy != "" {
-			httpclient.SetProxy(rootFlags.Proxy)
+		if persistentFlags.Proxy != "" {
+			httpclient.SetProxy(persistentFlags.Proxy)
 		}
 		util.InitFs()
 		source.InitCache()
@@ -60,7 +59,6 @@ the associated domain names, subnets, and geolocations.`,
 }
 
 type rootFlagStruct struct {
-	Proxy   string
 	Reverse bool
 	Both    bool
 	NoCache bool
@@ -70,8 +68,14 @@ type rootFlagStruct struct {
 
 var rootFlags = rootFlagStruct{}
 
+type persistentFlagStruct struct {
+	Proxy string
+}
+
+var persistentFlags = persistentFlagStruct{}
+
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.Proxy, "proxy", "p", "",
+	rootCmd.PersistentFlags().StringVarP(&persistentFlags.Proxy, "proxy", "p", "",
 		"set up a proxy, for example: http://127.0.0.1:7890")
 	rootCmd.Flags().BoolVarP(&rootFlags.Reverse, "reverse", "r", false,
 		"reverse the output table")
@@ -92,21 +96,12 @@ func renderIPLookupResult(resArr []data.IPLookupResult) {
 		}
 		fmt.Println(string(v))
 	} else {
-		table := tablewriter.NewWriter(os.Stdout)
 		var matrix [][]string
 		matrix = append(matrix, data.IPLookupResultTableHeader)
 		for _, res := range resArr {
 			matrix = append(matrix, []string{res.Source, res.Country, res.Region, res.City, res.ISP, res.Additional})
 		}
-		if rootFlags.Reverse {
-			matrix = util.TransposeMatrix(matrix)
-		}
-		table.AppendBulk(matrix)
-		table.SetAlignment(tablewriter.ALIGN_CENTER)
-		table.SetColumnAlignment([]int{tablewriter.ALIGN_CENTER})
-		table.SetAutoMergeCells(true)
-		table.SetRowLine(true)
-		table.Render()
+		util.WriteTable(matrix, os.Stdout, rootFlags.Reverse)
 	}
 }
 func Execute() {

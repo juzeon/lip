@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/juzeon/lip/util"
+	"golang.org/x/net/proxy"
 	"io"
 	"log"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -31,8 +32,14 @@ var packetCmd = &cobra.Command{
 			log.Fatalln("malformed target: " + err.Error())
 		}
 		addr := host + ":" + strconv.Itoa(port)
-		conn, err := net.DialTimeout(util.Ternary(packetFlags.UDP, "udp", "tcp"),
-			addr, time.Duration(packetFlags.Timeout)*time.Second)
+		dialer, err := util.GetProxyDialer(persistentFlags.Proxy, time.Duration(packetFlags.Timeout)*time.Second)
+		if err != nil {
+			log.Fatalln("cannot get dialer: " + err.Error())
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(packetFlags.Timeout)*time.Second)
+		defer cancel()
+		conn, err := dialer.(proxy.ContextDialer).
+			DialContext(ctx, util.Ternary(packetFlags.UDP, "udp", "tcp"), addr)
 		if err != nil {
 			log.Fatalln("network dial error: " + err.Error())
 		}

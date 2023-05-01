@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/juzeon/lip/util"
+	"golang.org/x/net/proxy"
 	"io"
 	"log"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -129,7 +129,14 @@ func (t tcpingResult) WriteOut(writer io.Writer) {
 func doTcpingOnce(address string) tcpingResult {
 	defer time.Sleep(time.Duration(tcpingFlags.Wait * float64(time.Second)))
 	t := time.Now()
-	conn, err := net.DialTimeout("tcp", address, time.Duration(tcpingFlags.Timeout)*time.Second)
+	dialer, err := util.GetProxyDialer(persistentFlags.Proxy,
+		time.Duration(tcpingFlags.Timeout)*time.Second)
+	if err != nil {
+		log.Fatalln("cannot get dialer: " + err.Error())
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(tcpingFlags.Timeout)*time.Second)
+	defer cancel()
+	conn, err := dialer.(proxy.ContextDialer).DialContext(ctx, "tcp", address)
 	if err != nil {
 		if strings.Contains(err.Error(), "actively refused") ||
 			strings.Contains(err.Error(), "connection refused") {
