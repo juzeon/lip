@@ -23,6 +23,7 @@ var uninitializedSources = []ISource{
 	&QQWry{},
 	&IPApi{},
 	&IPInfo{},
+	&IPIP{},
 }
 var Sources []ISource
 
@@ -31,7 +32,7 @@ func InitDatabases() {
 		src := src
 		err := src.Init()
 		if err != nil {
-			log.Println("failed to initialize " + src.GetName())
+			log.Println("failed to initialize " + src.GetName() + ": " + err.Error())
 			continue
 		}
 		Sources = append(Sources, src)

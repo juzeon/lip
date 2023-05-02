@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/ipipdotnet/ipdb-go v1.3.3 // indirect
 	github.com/likexian/gokit v0.25.13 // indirect
 	github.com/likexian/whois v1.15.0 // indirect
 	github.com/likexian/whois-parser v1.24.8 // indirect
