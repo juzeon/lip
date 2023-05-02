@@ -15,7 +15,7 @@ import (
 )
 
 var whoisCmd = &cobra.Command{
-	Use:   "whois [domain]",
+	Use:   "whois <domain>",
 	Short: "WHOIS lookup for a domain",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -25,7 +25,8 @@ var whoisCmd = &cobra.Command{
 			log.Fatalln("cannot get dialer: " + err.Error())
 		}
 		client := whois.NewClient().SetDialer(dialer).SetTimeout(time.Duration(whoisFlags.Timeout) * time.Second)
-		rawResult, err := client.Whois(args[0])
+		host, _ := util.RemoveProtocol(args[0])
+		rawResult, err := client.Whois(host)
 		if err != nil {
 			log.Fatalln("cannot do whois lookup: " + err.Error())
 		}

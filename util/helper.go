@@ -38,15 +38,20 @@ func TransposeMatrix[T any](matrix [][]T) [][]T {
 	return transposed
 }
 func ExtractHostPort(addr string) (string, int, error) {
-	arr := strings.Split(addr, ":")
-	if len(arr) != 2 {
+	h, p := RemoveProtocol(addr)
+	arr := strings.Split(h, ":")
+	if len(arr) != 2 && p == -1 ||
+		len(arr) < 1 || len(arr) > 2 {
 		return "", 0, errors.New("malformed addr string")
 	}
-	port, err := strconv.Atoi(arr[1])
-	if err != nil {
-		return "", 0, fmt.Errorf("cannot parse port: " + err.Error())
+	if len(arr) == 2 {
+		port, err := strconv.Atoi(arr[1])
+		if err != nil {
+			return "", 0, fmt.Errorf("cannot parse port: " + err.Error())
+		}
+		p = port
 	}
-	return arr[0], port, nil
+	return arr[0], p, nil
 }
 func WriteTable(matrix [][]string, writer io.Writer, reverse bool) {
 	firstRowAsHeader := true
@@ -101,4 +106,19 @@ func GetProxyDialer(proxyStringOrEmpty string, uncertainTimeout time.Duration) (
 		dialer = proxy.FromEnvironment()
 	}
 	return dialer, nil
+}
+func RemoveProtocol(addr string) (host string, port int) {
+	if strings.HasPrefix(addr, "http://") {
+		return addr[7:], 80
+	} else if strings.HasPrefix(addr, "https://") {
+		return addr[8:], 443
+	} else if strings.HasPrefix(addr, "ftp://") {
+		return addr[6:], 21
+	} else if strings.HasPrefix(addr, "socks5://") {
+		return addr[9:], 1080
+	} else if strings.HasPrefix(addr, "socks5h://") {
+		return addr[10:], 1080
+	} else {
+		return addr, -1
+	}
 }

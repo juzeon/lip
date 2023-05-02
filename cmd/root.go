@@ -33,7 +33,8 @@ connections from the comfort of your terminal.`,
 		source.DownloadDatabases(false)
 		source.InitDatabases()
 		defer source.CloseDatabases()
-		ips, err := parseIP(args[0])
+		host, _ := util.RemoveProtocol(args[0])
+		ips, err := parseIP(host)
 		if err != nil {
 			log.Fatalln("cannot parse ip address from the argument: " + err.Error())
 		}

@@ -18,18 +18,51 @@ import (
 )
 
 var packetCmd = &cobra.Command{
-	Use:   "packet <host:port> [content]",
+	Use:   "packet <host:port or host port> [content]",
 	Short: "Send TCP/UDP packets. Default: TCP",
-	Args:  cobra.MatchAll(cobra.MinimumNArgs(1), cobra.MaximumNArgs(2)),
+	Args:  cobra.MatchAll(cobra.MinimumNArgs(1), cobra.MaximumNArgs(3)),
 	Run: func(cmd *cobra.Command, args []string) {
-		if packetFlags.Interactive && len(args) == 2 ||
-			!packetFlags.Interactive && len(args) == 1 {
-			log.Fatalln("non-interactive mode requires a content argument while " +
-				"interactive mode does not accept one")
-		}
-		host, port, err := util.ExtractHostPort(args[0])
-		if err != nil {
-			log.Fatalln("malformed target: " + err.Error())
+		var host string
+		var port int
+		var content string
+		if len(args) == 1 {
+			if !packetFlags.Interactive {
+				log.Fatalln("non-interactive mode requires a content argument")
+			}
+			h, p, err := util.ExtractHostPort(args[0])
+			if err != nil {
+				log.Fatalln("cannot extract host and port: " + err.Error())
+			}
+			host = h
+			port = p
+		} else if len(args) == 2 {
+			if packetFlags.Interactive {
+				host, _ = util.RemoveProtocol(args[0])
+				p, err := strconv.Atoi(args[1])
+				if err != nil {
+					log.Fatalln("cannot parse port: " + err.Error())
+				}
+				port = p
+			} else {
+				h, p, err := util.ExtractHostPort(args[0])
+				if err != nil {
+					log.Fatalln("cannot extract host and port: " + err.Error())
+				}
+				host = h
+				port = p
+				content = args[1]
+			}
+		} else {
+			if packetFlags.Interactive {
+				log.Fatalln("interactive mode does not accept a content argument")
+			}
+			host, _ = util.RemoveProtocol(args[0])
+			p, err := strconv.Atoi(args[1])
+			if err != nil {
+				log.Fatalln("cannot parse port: " + err.Error())
+			}
+			port = p
+			content = args[2]
 		}
 		addr := host + ":" + strconv.Itoa(port)
 		dialer, err := util.GetProxyDialer(persistentFlags.Proxy, time.Duration(packetFlags.Timeout)*time.Second)
@@ -69,7 +102,7 @@ var packetCmd = &cobra.Command{
 				packetWrite(strings.TrimSpace(text), conn)
 			}
 		} else {
-			packetWrite(args[1], conn)
+			packetWrite(content, conn)
 			time.Sleep(time.Duration(packetFlags.Timeout) * time.Second)
 		}
 	},
@@ -111,7 +144,7 @@ func init() {
 	packetCmd.Flags().BoolVarP(&packetFlags.UDP, "udp", "u", false,
 		"use UDP instead of TCP")
 	packetCmd.Flags().BoolVarP(&packetFlags.Interactive, "interactive", "i", false,
-		"enter interactive mode")
+		"enter interactive mode. Note that this mode does not accept a content argument")
 	packetCmd.Flags().IntVarP(&packetFlags.Timeout, "timeout", "t", 5,
 		"n seconds timeout for network dial and data read")
 	packetCmd.Flags().StringVarP(&packetFlags.Linebreak, "linebreak", "b", "\r\n",

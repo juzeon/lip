@@ -32,7 +32,7 @@ var tcpingCmd = &cobra.Command{
 			host = h
 			port = p
 		} else {
-			host = args[0]
+			host, _ = util.RemoveProtocol(args[0])
 			p, err := strconv.Atoi(args[1])
 			if err != nil {
 				log.Fatalln("malformed arguments: " + err.Error())
