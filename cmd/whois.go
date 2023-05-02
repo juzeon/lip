@@ -174,7 +174,7 @@ func init() {
 	whoisCmd.Flags().BoolVarP(&whoisFlags.Reverse, "reverse", "r", false,
 		"reverse the output table")
 	whoisCmd.Flags().IntVarP(&whoisFlags.Timeout, "timeout", "t", 10,
-		"timeout for whois lookup")
+		"n seconds timeout for whois lookup")
 	whoisCmd.Flags().BoolVarP(&whoisFlags.JSON, "json", "j", false,
 		"use JSON output format instead of ASCII table")
 	whoisCmd.Flags().BoolVarP(&whoisFlags.Full, "full", "f", false,

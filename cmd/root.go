@@ -16,11 +16,13 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "lip <IP or domain>",
 	Short: "A tool to look up IP addresses.",
-	Long: `lip is a versatile command-line interface (CLI) tool that enables users to 
-look up IP addresses and perform a wide range of additional 
-functions. With lip, users can easily look up IP addresses, 
-both for IPv4 and IPv6, and obtain detailed information about 
-the associated domain names, subnets, and geolocations.`,
+	Long: `lip is a versatile command-line tool designed for 
+network administrators and enthusiasts, offering a suite 
+of robust functions that enable users to perform a variety 
+of network-related tasks efficiently and conveniently. With lip, 
+you can execute IP address lookups, bandwidth tests, WHOIS lookups, 
+reverse DNS lookups, SSL certificate checks, and TCPing and Telnet 
+connections from the comfort of your terminal.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
 		if persistentFlags.Proxy != "" {
