@@ -44,7 +44,7 @@ var tcpingCmd = &cobra.Command{
 			for {
 				res := doTcpingOnce(address)
 				res.WriteOut(os.Stdout)
-				if tcpingFlags.ExitOnce {
+				if tcpingFlags.ExitOnce && res.Num == tcpingOpen {
 					break
 				}
 			}
@@ -52,7 +52,7 @@ var tcpingCmd = &cobra.Command{
 			for i := 1; i <= tcpingFlags.Count; i++ {
 				res := doTcpingOnce(address)
 				res.WriteOut(os.Stdout)
-				if tcpingFlags.ExitOnce {
+				if tcpingFlags.ExitOnce && res.Num == tcpingOpen {
 					break
 				}
 			}
