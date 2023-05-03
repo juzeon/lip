@@ -142,7 +142,8 @@ func doTcpingOnce(address string) tcpingResult {
 			strings.Contains(err.Error(), "connection refused") {
 			return tcpingResult{Num: tcpingRST, Dur: time.Since(t), Addr: address}
 		} else if errors.Is(err, context.DeadlineExceeded) ||
-			errors.Is(err, syscall.ETIMEDOUT) {
+			errors.Is(err, syscall.ETIMEDOUT) ||
+			errors.Is(err, os.ErrDeadlineExceeded) {
 			return tcpingResult{Num: tcpingNoResponse, Dur: time.Since(t), Addr: address}
 		} else {
 			log.Println(err)
